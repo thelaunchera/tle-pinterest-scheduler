@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { mergeOriginalCarousels, originalCarousels } from "./editorial-carousels";
 import {
   createPinPilotBackup,
   DEFAULT_SETTINGS,
@@ -94,5 +95,36 @@ describe("The Launch Era editorial, without mixing brands or fake schedules", ()
     expect(migrated.removed).toBe(2);
     expect(migrated.pins.some(pin => pin.id === "pin-user-created")).toBe(true);
     expect(migrated.pins.some(pin => pin.id === "demo-breakfast")).toBe(false);
+  });
+});
+
+describe("Preserve real Notion carousel archives for later editing", () => {
+  it("contains 12 character web/AI carousels and 3 freebie carousels without publishing", () => {
+    const items = originalCarousels();
+    expect(items).toHaveLength(15);
+    expect(items.filter(pin => pin.id.startsWith("tle-character-"))).toHaveLength(12);
+    expect(items.filter(pin => pin.id.startsWith("tle-freebie-"))).toHaveLength(3);
+    expect(items.every(pin => pin.status === "draft" && pin.scheduledAt === null)).toBe(true);
+    expect(items.every(pin => /^https:\/\/app\.notion\.com\//.test(pin.sourceUrl))).toBe(true);
+    expect(items.every(pin => pin.slideCount === 5 || pin.slideCount === 4 || pin.slideCount === 9)).toBe(true);
+    expect(items.some(pin => pin.title.includes("Kim Possible") && pin.reviewNote.includes("clase"))).toBe(true);
+  });
+
+  it("keeps all 69 original PNG links in order and never duplicates sourced drafts", () => {
+    const items = originalCarousels();
+    expect(items.flatMap(pin => pin.slideUrls ?? [])).toHaveLength(69);
+    expect(items.every(pin => !pin.image)).toBe(true); // private Drive photos not copied to public GitHub
+    const first = mergeOriginalCarousels([samplePin]);
+    const repeated = mergeOriginalCarousels(first.pins);
+    expect(first.added).toBe(15);
+    expect(first.pins[0]).toEqual(samplePin);
+    expect(repeated.added).toBe(0);
+    expect(repeated.pins).toEqual(first.pins);
+  });
+
+  it("round-trips the Notion source links, full carousel slide order and review notes in JSON", () => {
+    const entry = originalCarousels()[0];
+    const backup = createPinPilotBackup([entry], DEFAULT_SETTINGS);
+    expect(parsePinPilotBackup(JSON.stringify(backup))).toEqual(backup);
   });
 });
