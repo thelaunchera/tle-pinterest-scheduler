@@ -301,6 +301,15 @@ export const readSettings = (): PlannerSettings => {
       }
       window.localStorage.setItem(FLORIDA_TIMEZONE_MIGRATION_KEY, "done");
     }
+    // Remove only the sample board labels shipped with the old demo workspace.
+    // Retain any real, user-created boards and the user's custom account name.
+    if (!window.localStorage.getItem("pinpilot.editorial-boards-tle-2026.v1")) {
+      const obsoleteBoards = new Set(["Ideas para desayunos", "Hogar cálido", "Flores y papelería"]);
+      const existingBoards = Array.isArray(parsed.boards) ? parsed.boards : [];
+      parsed.boards = [...new Set([...existingBoards.filter(board => !obsoleteBoards.has(board)), ...DEFAULT_SETTINGS.boards])];
+      if (parsed.accountName === "Mi cuenta de Pinterest") parsed.accountName = DEFAULT_SETTINGS.accountName;
+      window.localStorage.setItem("pinpilot.editorial-boards-tle-2026.v1", "done");
+    }
     return {
       ...DEFAULT_SETTINGS,
       ...parsed,
