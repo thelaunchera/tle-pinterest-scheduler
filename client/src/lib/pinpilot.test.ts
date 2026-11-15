@@ -3,6 +3,8 @@ import {
   createPinPilotBackup,
   DEFAULT_SETTINGS,
   fromZonedInputValue,
+  november2026CampaignPins,
+  mergeNovember2026CampaignPins,
   parsePinPilotBackup,
   type PinterestPin,
 } from "./pinpilot";
@@ -57,5 +59,28 @@ describe("US timezone conversion", () => {
     ["America/Chicago", "2026-07-15T09:00", "2026-07-15T14:00:00.000Z"],
   ])("preserves 09:00 local in %s at %s", (timezone, local, expected) => {
     expect(fromZonedInputValue(local, timezone)).toBe(expected);
+  });
+});
+
+describe("November 2026 Pinterest campaign", () => {
+  it("includes 3 pins at 10 AM Florida with real destination links", () => {
+    const pins = november2026CampaignPins();
+    expect(pins).toHaveLength(3);
+    expect(pins.map(pin => pin.scheduledAt)).toEqual([
+      "2026-11-16T15:00:00.000Z",
+      "2026-11-18T15:00:00.000Z",
+      "2026-11-20T15:00:00.000Z",
+    ]);
+    expect(pins.every(pin => pin.image.includes("pinpilot-campaign/2026-11/"))).toBe(true);
+    expect(pins.every(pin => pin.link.startsWith("https://"))).toBe(true);
+  });
+
+  it("merges without overwriting existing pins or duplicating the campaign", () => {
+    const first = mergeNovember2026CampaignPins([samplePin]);
+    const repeated = mergeNovember2026CampaignPins(first.pins);
+    expect(first.added).toBe(3);
+    expect(first.pins[0]).toEqual(samplePin);
+    expect(repeated.added).toBe(0);
+    expect(repeated.pins).toEqual(first.pins);
   });
 });
