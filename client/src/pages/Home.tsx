@@ -50,6 +50,9 @@ import {
   addDaysToDateKey,
   dateKeyDistance,
   createPinPilotBackup,
+  NOVEMBER_2026_CAMPAIGN,
+  november2026CampaignPins,
+  mergeNovember2026CampaignPins,
   parsePinPilotBackup,
   escapeSpreadsheetCsvCell,
   fromZonedInputValue,
@@ -306,6 +309,36 @@ export default function Home() {
   useEffect(() => {
     if (!saveSettings(settings)) toast.error("No se pudieron guardar tus preferencias.");
   }, [settings]);
+
+  // The campaign URL imports exactly the approved three pins into this browser.
+  // Other pins and account settings are preserved, and repeating the URL is idempotent.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("add-pins") !== NOVEMBER_2026_CAMPAIGN) return;
+
+    const merged = mergeNovember2026CampaignPins(readPins());
+    if (!savePins(merged.pins)) {
+      toast.error("No se pudieron guardar los 3 pines. Libera espacio y vuelve a abrir este enlace.");
+      return;
+    }
+
+    setPins(merged.pins);
+    const campaignBoards = november2026CampaignPins().map(pin => pin.board);
+    setSettings(previous => ({
+      ...previous,
+      boards: [...new Set([...previous.boards, ...campaignBoards])],
+    }));
+    setActiveSection("schedule");
+    setCalendarView("week");
+    setSelectedDate(dateFromDateKey("2026-11-16"));
+    setShownMonth(startOfMonth(dateFromDateKey("2026-11-16")));
+
+    url.searchParams.delete("add-pins");
+    window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
+    toast.success(merged.added > 0
+      ? `${merged.added} pines añadidos: 16, 18 y 20 de noviembre · 10 AM Florida.`
+      : "Estos 3 pines ya estaban en tu calendario. No se duplicaron.");
+  }, []);
 
   const todayKey = zonedDateKey(new Date(), settings.timezone);
   const todayDate = dateFromDateKey(todayKey);
