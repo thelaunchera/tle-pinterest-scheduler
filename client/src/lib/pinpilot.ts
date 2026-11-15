@@ -1,3 +1,5 @@
+import { mergeOriginalCarousels } from "./editorial-carousels";
+
 export type PinStatus = "draft" | "scheduled" | "published";
 
 export type PinterestPin = {
@@ -10,6 +12,11 @@ export type PinterestPin = {
   scheduledAt: string | null;
   status: PinStatus;
   exported: boolean;
+  sourceUrl?: string;
+  assetsUrl?: string;
+  slideUrls?: string[];
+  slideCount?: number;
+  reviewNote?: string;
 };
 
 export type PlannerSettings = {
@@ -39,7 +46,7 @@ export const DEFAULT_SETTINGS: PlannerSettings = {
   publishTime: "10:00",
   postsPerWeek: 3,
   daysOfWeek: [1, 3, 5],
-  boards: ["Websites & Digital Menus", "Creative Direction & Product Photos"],
+  boards: ["Websites & Digital Menus", "Creative Direction & Product Photos", "Personajes · Websites + IA", "Freebies · Carruseles creativos"],
 };
 
 const zonedParts = (value: string | Date, timezone: string) => {
@@ -243,6 +250,8 @@ const OLD_DEMO_IDS = new Set([
 ]);
 const EDITORIAL_MIGRATION_KEY = "pinpilot.editorial-tle-2026.v1";
 const EDITORIAL_PREVIOUS_BACKUP_KEY = "pinpilot.editorial-tle-2026.previous-pins.v1";
+const CAROUSEL_MIGRATION_KEY = "pinpilot.original-carousels.v1";
+const CAROUSEL_PREVIOUS_BACKUP_KEY = "pinpilot.original-carousels.previous-pins.v1";
 
 export const createDemoPins = (): PinterestPin[] => []; // No fabricated demo pins in a real business workspace.
 
@@ -257,16 +266,24 @@ export const readPins = (): PinterestPin[] => {
     const raw = window.localStorage.getItem(PINS_KEY);
     const parsed: unknown = raw ? JSON.parse(raw) : [];
     const current = Array.isArray(parsed) ? (parsed as PinterestPin[]) : [];
-    if (window.localStorage.getItem(EDITORIAL_MIGRATION_KEY) === "done") return current;
-    const migration = migrateToRealEditorialPins(current);
-    if (raw !== null && raw !== JSON.stringify(migration.pins) &&
-        window.localStorage.getItem(EDITORIAL_PREVIOUS_BACKUP_KEY) === null) {
-      // Fail safe: never overwrite old pins if there is no space to preserve a backup.
-      window.localStorage.setItem(EDITORIAL_PREVIOUS_BACKUP_KEY, raw);
+    const editorialDone = window.localStorage.getItem(EDITORIAL_MIGRATION_KEY) === "done";
+    const carouselDone = window.localStorage.getItem(CAROUSEL_MIGRATION_KEY) === "done";
+    if (editorialDone && carouselDone) return current;
+
+    // Never replace an edited draft; import only unseen source IDs.
+    const basePins = editorialDone ? current : migrateToRealEditorialPins(current).pins;
+    const updatedPins = carouselDone ? basePins : mergeOriginalCarousels(basePins).pins;
+    if (raw !== null && raw !== JSON.stringify(updatedPins)) {
+      // Keep one local copy of the entire previous library before changing it.
+      const backupKey = editorialDone ? CAROUSEL_PREVIOUS_BACKUP_KEY : EDITORIAL_PREVIOUS_BACKUP_KEY;
+      if (window.localStorage.getItem(backupKey) === null) {
+        window.localStorage.setItem(backupKey, raw);
+      }
     }
-    window.localStorage.setItem(PINS_KEY, JSON.stringify(migration.pins));
-    window.localStorage.setItem(EDITORIAL_MIGRATION_KEY, "done");
-    return migration.pins;
+    window.localStorage.setItem(PINS_KEY, JSON.stringify(updatedPins));
+    if (!editorialDone) window.localStorage.setItem(EDITORIAL_MIGRATION_KEY, "done");
+    if (!carouselDone) window.localStorage.setItem(CAROUSEL_MIGRATION_KEY, "done");
+    return updatedPins;
   } catch {
     // Preserve the original browser records on storage failure rather than risk data loss.
     try {
@@ -313,7 +330,7 @@ export const readSettings = (): PlannerSettings => {
     return {
       ...DEFAULT_SETTINGS,
       ...parsed,
-      boards: Array.isArray(parsed.boards) ? parsed.boards : DEFAULT_SETTINGS.boards,
+      boards: Array.isArray(parsed.boards) ? [...new Set([...parsed.boards, ...DEFAULT_SETTINGS.boards])] : DEFAULT_SETTINGS.boards,
       daysOfWeek: Array.isArray(parsed.daysOfWeek)
         ? parsed.daysOfWeek
         : DEFAULT_SETTINGS.daysOfWeek,
@@ -377,7 +394,26 @@ const parseBackupPin = (value: unknown, index: number): PinterestPin => {
   ) {
     throw new Error(`El pin ${index + 1} del respaldo contiene campos inválidos.`);
   }
-  return { id, title, description, link, board, image, scheduledAt, status, exported };
+  // Keep source links, slide order and editorial review notes in JSON backups.
+  const { sourceUrl, assetsUrl, slideUrls, slideCount, reviewNote } = value;
+  const validSourceLink = (link: unknown) =>
+    typeof link === "string" && link.length <= 2000 && /^https:\/\//.test(link);
+  if (
+    (sourceUrl !== undefined && !validSourceLink(sourceUrl)) ||
+    (assetsUrl !== undefined && !validSourceLink(assetsUrl)) ||
+    (slideUrls !== undefined &&
+      (!Array.isArray(slideUrls) || slideUrls.length > 24 || !slideUrls.every(validSourceLink))) ||
+    (slideCount !== undefined && (!Number.isInteger(slideCount) || (slideCount as number) < 0 || (slideCount as number) > 24)) ||
+    (reviewNote !== undefined && (typeof reviewNote !== "string" || reviewNote.length > 2000))
+  ) throw new Error(`El pin ${index + 1} contiene enlaces o notas de carrusel inválidos.`);
+  return {
+    id, title, description, link, board, image, scheduledAt, status, exported,
+    ...(sourceUrl !== undefined ? { sourceUrl: sourceUrl as string } : {}),
+    ...(assetsUrl !== undefined ? { assetsUrl: assetsUrl as string } : {}),
+    ...(slideUrls !== undefined ? { slideUrls: slideUrls as string[] } : {}),
+    ...(slideCount !== undefined ? { slideCount: slideCount as number } : {}),
+    ...(reviewNote !== undefined ? { reviewNote: reviewNote as string } : {}),
+  };
 };
 
 const parseBackupSettings = (value: unknown): PlannerSettings => {
