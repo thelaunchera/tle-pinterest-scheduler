@@ -4,8 +4,5 @@
   "framework": "vite",
   "installCommand": "pnpm install --frozen-lockfile",
   "buildCommand": "pnpm build:static",
-  "outputDirectory": "dist/public",
-  "rewrites": [
-    { "source": "/((?!api/platform/config\\.js|assets/|favicon\\.ico|pinpilot-mark\\.svg).*)", "destination": "/index.html" }
-  ]
+  "outputDirectory": "dist/public"
 }
