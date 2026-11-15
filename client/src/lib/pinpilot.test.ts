@@ -3,8 +3,9 @@ import {
   createPinPilotBackup,
   DEFAULT_SETTINGS,
   fromZonedInputValue,
-  november2026CampaignPins,
-  mergeNovember2026CampaignPins,
+  editorial2026Pins,
+  mergeEditorial2026Pins,
+  migrateToRealEditorialPins,
   parsePinPilotBackup,
   type PinterestPin,
 } from "./pinpilot";
@@ -62,25 +63,36 @@ describe("US timezone conversion", () => {
   });
 });
 
-describe("November 2026 Pinterest campaign", () => {
-  it("includes 3 pins at 10 AM Florida with real destination links", () => {
-    const pins = november2026CampaignPins();
-    expect(pins).toHaveLength(3);
-    expect(pins.map(pin => pin.scheduledAt)).toEqual([
-      "2026-11-16T15:00:00.000Z",
-      "2026-11-18T15:00:00.000Z",
-      "2026-11-20T15:00:00.000Z",
-    ]);
-    expect(pins.every(pin => pin.image.includes("pinpilot-campaign/2026-11/"))).toBe(true);
-    expect(pins.every(pin => pin.link.startsWith("https://"))).toBe(true);
+describe("The Launch Era editorial, without mixing brands or fake schedules", () => {
+  it("uses real Notion editorial sources as unscheduled drafts", () => {
+    const pins = editorial2026Pins();
+    expect(pins).toHaveLength(7);
+    expect(new Set(pins.map(pin => pin.id)).size).toBe(7);
+    expect(pins.every(pin => pin.scheduledAt === null && pin.status === "draft")).toBe(true);
+    expect(pins.some(pin => pin.title.includes("What could your website look like?"))).toBe(true);
+    expect(pins.some(pin => pin.title.includes("Admin Panel"))).toBe(true);
+    expect(pins.some(pin => pin.link.includes("content-lab/prompts/"))).toBe(true);
+    expect(pins.every(pin => !/cleaning|class|clase|block jam/i.test(pin.title))).toBe(true);
   });
 
-  it("merges without overwriting existing pins or duplicating the campaign", () => {
-    const first = mergeNovember2026CampaignPins([samplePin]);
-    const repeated = mergeNovember2026CampaignPins(first.pins);
-    expect(first.added).toBe(3);
+  it("does not duplicate content or overwrite existing user-created pins", () => {
+    const first = mergeEditorial2026Pins([samplePin]);
+    const again = mergeEditorial2026Pins(first.pins);
+    expect(first.added).toBe(7);
     expect(first.pins[0]).toEqual(samplePin);
-    expect(repeated.added).toBe(0);
-    expect(repeated.pins).toEqual(first.pins);
+    expect(again.added).toBe(0);
+    expect(again.pins).toEqual(first.pins);
+  });
+
+  it("removes only obsolete examples and the three speculative old pins", () => {
+    const old: PinterestPin[] = [
+      { ...samplePin, id: "demo-breakfast" },
+      { ...samplePin, id: "tle-pin-2026-11-16-freebie-photo-ideas" },
+      { ...samplePin, id: "pin-user-created", title: "My own business pin" },
+    ];
+    const migrated = migrateToRealEditorialPins(old);
+    expect(migrated.removed).toBe(2);
+    expect(migrated.pins.some(pin => pin.id === "pin-user-created")).toBe(true);
+    expect(migrated.pins.some(pin => pin.id === "demo-breakfast")).toBe(false);
   });
 });
