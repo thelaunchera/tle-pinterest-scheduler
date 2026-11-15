@@ -1,16 +1,11 @@
 # PinPilot — The Launch Era
 
-Este repositorio está preparado para importar el código fuente original de PinPilot desde Manus. **La aplicación todavía no está instalada aquí.**
+Importación del código fuente original de PinPilot proporcionado por el propietario.
 
-## Importar el ZIP sin créditos de Manus
+- Este commit agrega `pinpilot-source.zip` y activa la extracción automática.
+- La extracción verifica el hash SHA-256 y publicará los archivos fuente en `main`.
+- El paquete contiene un workflow para construir la aplicación React y desplegarla en GitHub Pages.
+- Los pines existentes se almacenan en localStorage: respalda los datos JSON desde la URL original antes de cambiar de dominio.
+- Planificar pines no equivale a publicarlos en Pinterest: actualmente no hay OAuth ni integración directa con Pinterest.
 
-1. En GitHub, cambia primero la visibilidad de este repositorio a **Private**: **Settings → General → Danger Zone → Change repository visibility**. El respaldo puede contener trabajo privado.
-2. Abre **Add file → Upload files** y sube el archivo `tle-pinterest-scheduler-source.zip` sin descomprimirlo. Confirma la carga en la rama `main`.
-3. Abre **Actions → Import PinPilot source ZIP → Run workflow**. El flujo comprueba que el repositorio sea privado, extrae el código, retira el ZIP y crea un commit con los archivos del proyecto.
-4. Comprueba que aparezcan `client/`, `server/`, `package.json` y `pnpm-lock.yaml`.
-
-**Importante:** la transferencia al repositorio no despliega ni publica PinPilot. Tampoco migra los datos almacenados en tu navegador. Antes de cambiar de dominio, descarga el respaldo completo JSON en PinPilot.
-
-El flujo se ejecuta **solo cuando lo inicias manualmente**. No modifica otros repositorios y se detendrá si detecta código fuente previo que podría sobrescribirse.
-
-Tras la importación, sigue las instrucciones del `README.md` original de PinPilot para instalar, verificar y ejecutar la aplicación.
+El `README.md` original sustituirá este texto una vez importado el proyecto.
