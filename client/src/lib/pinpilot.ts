@@ -31,10 +31,11 @@ export type PinPilotBackup = {
 
 const PINS_KEY = "pinpilot.pins.v1";
 const SETTINGS_KEY = "pinpilot.settings.v1";
+const FLORIDA_TIMEZONE_MIGRATION_KEY = "pinpilot.timezone.florida.v1";
 
 export const DEFAULT_SETTINGS: PlannerSettings = {
   accountName: "Mi cuenta de Pinterest",
-  timezone: "America/Mexico_City",
+  timezone: "America/New_York",
   publishTime: "09:00",
   postsPerWeek: 3,
   daysOfWeek: [1, 3, 5],
@@ -217,8 +218,18 @@ export const savePins = (pins: PinterestPin[]): boolean => {
 export const readSettings = (): PlannerSettings => {
   try {
     const raw = window.localStorage.getItem(SETTINGS_KEY);
-    if (!raw) return DEFAULT_SETTINGS;
+    if (!raw) {
+      window.localStorage.setItem(FLORIDA_TIMEZONE_MIGRATION_KEY, "done");
+      return DEFAULT_SETTINGS;
+    }
     const parsed = JSON.parse(raw) as Partial<PlannerSettings>;
+    // Migrate the original Mexico City default once without changing later custom choices.
+    if (!window.localStorage.getItem(FLORIDA_TIMEZONE_MIGRATION_KEY)) {
+      if (parsed.timezone === "America/Mexico_City") {
+        parsed.timezone = "America/New_York";
+      }
+      window.localStorage.setItem(FLORIDA_TIMEZONE_MIGRATION_KEY, "done");
+    }
     return {
       ...DEFAULT_SETTINGS,
       ...parsed,
