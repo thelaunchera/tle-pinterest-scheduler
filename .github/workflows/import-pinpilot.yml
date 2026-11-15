@@ -1,0 +1,83 @@
+name: Import PinPilot source ZIP
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    name: Extract source into this repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Require private repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          is_private="$(gh api "repos/${GITHUB_REPOSITORY}" --jq '.private')"
+          if [ "$is_private" != "true" ]; then
+            echo "::error::Make this repository Private before importing the source ZIP."
+            exit 1
+          fi
+
+      - name: Validate and extract uploaded ZIP
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path, PurePosixPath
+          import stat, zipfile
+
+          archive = Path("tle-pinterest-scheduler-source.zip")
+          if not archive.is_file():
+              raise SystemExit("Upload tle-pinterest-scheduler-source.zip to the repository root first.")
+
+          # Fail safely if Manus has already pushed source code here.
+          allowed = {".git", ".github", "README.md", archive.name}
+          existing = [p.name for p in Path(".").iterdir() if p.name not in allowed]
+          if existing:
+              raise SystemExit("Source files already exist; refusing to overwrite: " + ", ".join(existing[:15]))
+
+          with zipfile.ZipFile(archive) as zf:
+              members = zf.infolist()
+              if len(members) > 500:
+                  raise SystemExit("Unexpected ZIP: too many entries")
+              if sum(m.file_size for m in members) > 100 * 1024 * 1024:
+                  raise SystemExit("Unexpected ZIP: too large after extraction")
+
+              for info in members:
+                  p = PurePosixPath(info.filename)
+                  if info.is_dir():
+                      continue
+                  if (p.is_absolute() or ".." in p.parts or "\\" in info.filename
+                      or not p.parts or p.parts[0] in (".git", ".github")
+                      or info.file_size > 10 * 1024 * 1024):
+                      raise SystemExit("Unsafe ZIP entry: " + info.filename)
+                  mode = (info.external_attr >> 16) & 0xFFFF
+                  if stat.S_ISLNK(mode):
+                      raise SystemExit("Symlink not allowed: " + info.filename)
+                  if p.name == ".env" or p.name.startswith(".env.") and p.name != ".env.example":
+                      raise SystemExit("Potential secret environment file in ZIP: " + info.filename)
+
+              for info in members:
+                  if info.is_dir():
+                      continue
+                  p = PurePosixPath(info.filename)
+                  target = Path(*p.parts)
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  target.write_bytes(zf.read(info))
+
+          archive.unlink()
+          print("PinPilot source extracted; archive removed.")
+          PY
+
+      - name: Commit imported files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Import PinPilot source exported from Manus"
+          git push origin HEAD:main
