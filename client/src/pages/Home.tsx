@@ -45,6 +45,7 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useMemo, useState, type ChangeEvent, type DragEvent, type FormEvent } from "react";
+import { mergeOriginalCarousels } from "@/lib/editorial-carousels";
 import { toast } from "sonner";
 import {
   addDaysToDateKey,
@@ -313,7 +314,8 @@ export default function Home() {
   // The user's live Notion editorial sources are now the sole initial PinPilot content.
   // Optional link/button can re-add missing approved-source drafts, never overwrite edits.
   const restoreEditorialDrafts = () => {
-    const merged = mergeEditorial2026Pins(readPins());
+    const allExisting = mergeEditorial2026Pins(readPins());
+    const merged = mergeOriginalCarousels(allExisting.pins);
     if (!savePins(merged.pins)) {
       toast.error("No se pudieron guardar los borradores. Revisa el espacio del navegador.");
       return;
@@ -328,8 +330,10 @@ export default function Home() {
     setActiveSection("library");
     setLibraryFilter("draft");
     toast.success(merged.added > 0
-      ? `${merged.added} fichas reales del Centro Editorial añadidas como borradores. Nada se programó.`
-      : "Las fichas editoriales ya estaban en tu biblioteca. No se duplicaron.");
+      ? `${allExisting.added + merged.added} fichas y carruseles de Notion recuperados como borradores. Nada se programó.`
+      : allExisting.added > 0
+        ? `${allExisting.added} fichas editoriales añadidas sin duplicar carruseles.`
+        : "Las fichas y carruseles ya estaban guardados. No se duplicaron.");
   };
 
   useEffect(() => {
@@ -735,11 +739,11 @@ export default function Home() {
           <section className="backup-card" aria-label="Centro Editorial de The Launch Era">
             <div className="backup-card-heading">
               <span className="small-card-icon"><Sparkles size={17} /></span>
-              <div><b>Centro Editorial · The Launch Era</b><p>Websites, menús digitales, demos y creatividad. Borradores de Notion: sin clase, limpieza ni ejemplos inventados. No se publican automáticamente.</p></div>
+              <div><b>Centro Editorial · The Launch Era</b><p>Websites, menús digitales, freebies y 12 carruseles de personajes. Las referencias a web con IA se conservan para editar después. Nada se programa automáticamente.</p></div>
             </div>
             <div className="backup-actions">
               <button className="button button-secondary" onClick={restoreEditorialDrafts}>
-                <Plus size={15} /> Recuperar fichas editoriales
+                <Plus size={15} /> Recuperar posts y carruseles
               </button>
             </div>
           </section>
@@ -928,6 +932,26 @@ export default function Home() {
               <label className="form-label">Fecha y hora <span>Opcional</span><input className="form-input" type="datetime-local" value={toZonedInputValue(form.scheduledAt, settings.timezone)} onChange={event => setForm(previous => ({ ...previous, scheduledAt: fromZonedInputValue(event.target.value, settings.timezone), status: event.target.value ? "scheduled" : "draft" }))} /></label>
               <div className="image-field"><div><b>Imagen del pin</b><small>Una imagen vertical funciona mejor en Pinterest.</small></div><label className="upload-button"><Upload size={15} /> {form.image ? "Cambiar imagen" : "Subir imagen"}<input type="file" accept="image/*" onChange={handleImageUpload} /></label></div>
               {form.image && <div className="image-preview"><img src={form.image} alt="Vista previa del pin" /><button type="button" className="remove-image" onClick={() => setForm(previous => ({ ...previous, image: "" }))}><X size={14} /> Quitar</button></div>}
+              {editingId && pins.find(pin => pin.id === editingId)?.sourceUrl && (() => {
+                const original = pins.find(pin => pin.id === editingId)!;
+                return <div className="backup-card">
+                  <div className="backup-card-heading"><span className="small-card-icon"><LibraryBig size={18}/></span>
+                    <div><b>Carrusel original · {original.slideCount ?? "varios"} slides</b>
+                      <p>{original.reviewNote ?? "Conservado para revisión editorial. No se publicará automáticamente."}</p>
+                    </div>
+                  </div>
+                  <div className="backup-actions">
+                    <a className="button button-secondary" href={original.sourceUrl} target="_blank" rel="noopener noreferrer"><ExternalLink size={14}/> Ficha en Notion</a>
+                    {original.assetsUrl && <a className="button button-secondary" href={original.assetsUrl} target="_blank" rel="noopener noreferrer"><ExternalLink size={14}/> PNG originales en Drive</a>}
+                  </div>
+                  {!!original.slideUrls?.length && <div className="backup-actions">
+                    {original.slideUrls.map((url, index) =>
+                      <a className="button button-ghost" key={url} href={url} target="_blank" rel="noopener noreferrer">Slide {String(index + 1).padStart(2,"0")}</a>
+                    )}
+                  </div>}
+                  <small className="backup-privacy">Los PNG permanecen en sus carpetas originales. Descarga y edita la portada antes de publicar el pin.</small>
+                </div>;
+              })()}
               <div className="editor-footer"><div>{editingId && form.status !== "published" && <button type="button" className="text-button mark-published" onClick={markAsPublished}><CheckCircle2 size={14} /> Marcar como publicado</button>}{editingId && form.status === "published" && <span className="manual-published"><CheckCircle2 size={14} /> Marcado manualmente</span>}</div><div className="editor-footer-actions"><button type="button" className="button button-ghost" onClick={closeEditor}>Cancelar</button><button type="submit" className="button button-primary"><Check size={15} /> Guardar pin</button></div></div>
             </form>
           </section>
