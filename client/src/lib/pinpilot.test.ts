@@ -46,6 +46,10 @@ describe("PinPilot JSON backup", () => {
 });
 
 describe("US timezone conversion", () => {
+  it("uses Florida Eastern time for new planners", () => {
+    expect(DEFAULT_SETTINGS.timezone).toBe("America/New_York");
+  });
+
   it.each([
     ["America/New_York", "2026-01-15T09:00", "2026-01-15T14:00:00.000Z"],
     ["America/New_York", "2026-07-15T09:00", "2026-07-15T13:00:00.000Z"],
