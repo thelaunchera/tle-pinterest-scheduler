@@ -3,7 +3,9 @@ name: Import PinPilot source ZIP
 on:
   push:
     branches: [main]
-    paths: ["pinpilot-source.zip"]
+    paths:
+      - "pinpilot-source.zip"
+      - ".github/workflows/import-pinpilot.yml"
   workflow_dispatch:
 
 permissions:
@@ -15,14 +17,21 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: Check whether archive remains
+        id: archive
+        run: |
+          if test -f pinpilot-source.zip; then
+            echo 'found=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'found=false' >> "$GITHUB_OUTPUT"
+          fi
       - name: Safely extract verified PinPilot source
+        if: steps.archive.outputs.found == 'true'
         run: |
           python3 - <<'PY'
           from pathlib import Path, PurePosixPath
           import hashlib, stat, zipfile
           archive = Path("pinpilot-source.zip")
-          if not archive.exists():
-              raise SystemExit("Missing source archive")
           expected = "3e5aa64da9404cc430f0f70c6af540d3ee60f6bd9e761aaa4af8eaddbc0df2a2"
           if hashlib.sha256(archive.read_bytes()).hexdigest() != expected:
               raise SystemExit("Source archive failed checksum verification")
@@ -39,17 +48,18 @@ jobs:
                   if ((info.external_attr >> 16) & 0o170000) == stat.S_IFLNK:
                       raise SystemExit("Symlink not allowed")
               for info in members:
-                  if info.is_dir():
+                  if info.is_dir() or info.filename == ".github/workflows/deploy-pages.yml":
                       continue
                   path = Path(info.filename)
                   path.parent.mkdir(parents=True, exist_ok=True)
                   path.write_bytes(z.read(info))
           archive.unlink()
           PY
-      - name: Commit project files
+      - name: Commit project files (keep workflows separate)
+        if: steps.archive.outputs.found == 'true'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
-          git commit -m "Import PinPilot source from Manus and configure GitHub Pages"
+          git commit -m "Import PinPilot app source (without workflows)"
           git push origin HEAD:main
