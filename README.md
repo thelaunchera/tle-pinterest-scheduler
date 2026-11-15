@@ -83,16 +83,17 @@ La exportación CSV sigue disponible para trabajar con títulos, descripciones, 
 - `pnpm test`: pruebas automatizadas.
 - `pnpm build` / `pnpm start`: construir / ejecutar el servidor de producción.
 
-## Proyecto de The Launch Era
+## GitHub: código fuente y publicación
 
-Este repositorio es el código fuente de **PinPilot**, un proyecto de [The Launch Era](https://thelaunchera.com). El código ya está en la rama `main` de GitHub. No requiere mover el dominio principal ni configurar DNS para conservar el proyecto aquí.
+El proyecto completo de **PinPilot — The Launch Era** se conserva en este repositorio:
 
-- **Repositorio:** https://github.com/thelaunchera/tle-pinterest-scheduler
-- **Aplicación funcionando en AppDeploy:** https://pinpilot-the-launch-era-kwfc29.v2.appdeploy.ai/
-- **Identificador AppDeploy:** `pinpilot-the-launch-era-kwfc29`
-- **Zona horaria predeterminada:** `America/New_York` (Florida, con horario de verano automático)
-- **Pruebas en GitHub:** `.github/workflows/check.yml`, ejecuta TypeScript, tests y compilación
+- **Código editable:** rama `main`.
+- **Sitio web compilado:** rama `gh-pages`, construida automáticamente por `.github/workflows/publish-github-pages.yml`.
+- **URL de GitHub Pages:** https://thelaunchera.github.io/tle-pinterest-scheduler/
+- **Zona horaria:** `America/New_York` (Florida; EST/EDT automático).
 
-GitHub contiene el proyecto original completo. AppDeploy contiene una adaptación independiente de su frontend. Guardar o modificar archivos en este repo **no** cambia la versión publicada en AppDeploy automáticamente. Vincular esta app mediante un enlace desde `thelaunchera.com` sería una modificación separada del website principal, no una configuración de DNS.
+El enlace de GitHub Pages solo funcionará después de la **activación inicial de GitHub Pages**. La instalación actual de GitHub no concede a la automatización permisos para realizar esa activación administrativa. Desde el repositorio, entra en **Settings → Pages → Build and deployment**; selecciona **Deploy from a branch**, rama **gh-pages**, carpeta **/(root)** y pulsa **Save**. GitHub puede tardar unos minutos en publicar. Esta activación no requiere añadir dominios ni registros DNS.
 
-Los pines y ajustes se guardan localmente en cada navegador. Antes de cambiar de dirección o dispositivo, utiliza **Exportar → Descargar respaldo completo** y luego **Importar respaldo JSON**. PinPilot permite planificar horarios, pero **todavía no publica automáticamente en Pinterest**.
+El código y el sitio compilado ya se preparan directamente desde GitHub. Los cambios futuros en `main` compilarán otra vez la web en `gh-pages` de forma automática.
+
+> **Datos existentes:** la versión web guarda los pines, borradores y ajustes en el navegador local. Cambiar de dirección no los migra automáticamente. Exporta un respaldo JSON desde la instalación anterior e impórtalo en la web de GitHub cuando esté activa. Programar horarios en PinPilot no publica automáticamente en Pinterest.
