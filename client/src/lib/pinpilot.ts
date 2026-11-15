@@ -34,12 +34,12 @@ const SETTINGS_KEY = "pinpilot.settings.v1";
 const FLORIDA_TIMEZONE_MIGRATION_KEY = "pinpilot.timezone.florida.v1";
 
 export const DEFAULT_SETTINGS: PlannerSettings = {
-  accountName: "Mi cuenta de Pinterest",
+  accountName: "The Launch Era · Pinterest",
   timezone: "America/New_York",
-  publishTime: "09:00",
+  publishTime: "10:00",
   postsPerWeek: 3,
   daysOfWeek: [1, 3, 5],
-  boards: ["Ideas para desayunos", "Hogar cálido", "Flores y papelería"],
+  boards: ["Websites & Digital Menus", "Creative Direction & Product Photos"],
 };
 
 const zonedParts = (value: string | Date, timezone: string) => {
@@ -144,111 +144,136 @@ const addDaysAtTime = (offset: number, time = "09:00") => {
   return fromZonedInputValue(`${dateKey}T${time}`, DEFAULT_SETTINGS.timezone) ?? new Date().toISOString();
 };
 
-// Campaign assets are committed to this public GitHub repository and deployed with GitHub Pages.
-// They are only added to a visitor's browser when the explicit campaign link is opened.
-export const NOVEMBER_2026_CAMPAIGN = "tle-nov-2026";
-
-export const november2026CampaignPins = (): PinterestPin[] => [
+// Curated from the current The Launch Era Notion editorial notebook and the live creative freebie.
+// These are DRAFTS, not approved Pinterest publications. Keep separate from Podcast, Class and Content Lab calendars.
+export const EDITORIAL_IMPORT_KEY = "tle-editorial-2026";
+export const editorial2026Pins = (): PinterestPin[] => [
   {
-    id: "tle-pin-2026-11-16-freebie-photo-ideas",
-    title: "8 Product Photography Ideas for Your Small Business",
-    description: "One product can inspire more than one beautiful post. Explore 8 free visual prompts to create fresh compositions for your shop, cafe, beauty brand or product business. Blue Hour is a creative product concept by The Launch Era. Get the free prompts.",
-    link: "https://podcast.thelaunchera.com/content-lab/prompts/",
-    board: "Creative Ideas for Small Businesses",
-    image: `${import.meta.env.BASE_URL}pinpilot-campaign/2026-11/blue-hour.png`,
-    scheduledAt: "2026-11-16T15:00:00.000Z",
-    status: "scheduled",
-    exported: false,
-  },
-  {
-    id: "tle-pin-2026-11-18-food-digital-menu",
-    title: "Food Business Branding, Websites & Digital Menu Ideas",
-    description: "Beautiful food photography is just the beginning. See how a thoughtful website can help a cafe, bakery or food business present its products, menu and brand online. Golden Grid is a concept project by The Launch Era. Explore our website services and interactive demos.",
+    id: "tle-notion-418a-website-portfolio",
+    title: "What could your website look like?",
+    description: "What could your website look like? Here are four concepts from The Launch Era, from a brownie shop with gift boxes to a nail studio with an inspo wall. DM us WEBSITE and tell us what you’re building.",
     link: "https://thelaunchera.com/website-for-your-business/",
-    board: "Digital Menus & Food Websites",
+    board: "Websites & Digital Menus",
     image: `${import.meta.env.BASE_URL}pinpilot-campaign/2026-11/golden-grid.png`,
-    scheduledAt: "2026-11-18T15:00:00.000Z",
-    status: "scheduled",
-    exported: false,
-  },
-  {
-    id: "tle-pin-2026-11-20-beauty-website",
-    title: "A Beautiful Brand Deserves a Website to Match",
-    description: "Your Instagram introduces your business. A clear website gives people another place to explore your services and find the next step. Whether you run a nail studio, salon or another small business, see what a more organized online presence could look like. Nail Room is a concept project by The Launch Era.",
-    link: "https://thelaunchera.com/",
-    board: "Websites for Small Businesses",
-    image: `${import.meta.env.BASE_URL}pinpilot-campaign/2026-11/nail-room.png`,
-    scheduledAt: "2026-11-20T15:00:00.000Z",
-    status: "scheduled",
-    exported: false,
-  },
-];
-
-export const mergeNovember2026CampaignPins = (existing: PinterestPin[]) => {
-  const existingIds = new Set(existing.map(pin => pin.id));
-  const added = november2026CampaignPins().filter(pin => !existingIds.has(pin.id));
-  return { added: added.length, pins: [...existing, ...added] };
-};
-
-export const createDemoPins = (): PinterestPin[] => [
-  {
-    id: "demo-breakfast",
-    title: "Un desayuno nutritivo en 10 minutos",
-    description:
-      "Ideas sencillas para comenzar la mañana con algo rico, colorido y lleno de energía.",
-    link: "https://example.com/desayunos-faciles",
-    board: "Ideas para desayunos",
-    image: `${import.meta.env.BASE_URL}assets/pin-breakfast.jpg`,
-    scheduledAt: addDaysAtTime(2, "09:00"),
-    status: "scheduled",
-    exported: false,
-  },
-  {
-    id: "demo-home",
-    title: "Un rincón cálido con tonos terracota",
-    description:
-      "Texturas naturales, plantas y tonos cálidos para transformar un espacio sin complicarlo.",
-    link: "https://example.com/decoracion-calida",
-    board: "Hogar cálido",
-    image: `${import.meta.env.BASE_URL}assets/pin-interior.jpg`,
-    scheduledAt: addDaysAtTime(5, "09:00"),
-    status: "scheduled",
-    exported: false,
-  },
-  {
-    id: "demo-flowers",
-    title: "Flores prensadas para tus proyectos creativos",
-    description:
-      "Guarda tus flores favoritas y úsalas para crear tarjetas, separadores y detalles hechos a mano.",
-    link: "https://example.com/flores-prensadas",
-    board: "Flores y papelería",
-    image: `${import.meta.env.BASE_URL}assets/pin-flowers.jpg`,
     scheduledAt: null,
     status: "draft",
     exported: false,
   },
   {
-    id: "demo-guide",
-    title: "Tu guía rápida para planear la semana",
-    description:
-      "Un plan ligero para guardar ideas, elegir prioridades y tener más claridad al comenzar la semana.",
-    link: "",
-    board: "Ideas para desayunos",
+    id: "tle-notion-418a-blue-hour",
+    title: "Blue Hour — Fragrance Editorial",
+    description: "I started with a cobalt bottle and one question. How many moods can a single shade of blue hold? I used AI to explore four scenes for the same bottle. Blue Hour is a fragrance concept by The Launch Era. Which frame would you put on the cover?",
+    link: "https://thelaunchera.com/",
+    board: "Creative Direction & Product Photos",
+    image: `${import.meta.env.BASE_URL}pinpilot-campaign/2026-11/blue-hour.png`,
+    scheduledAt: null,
+    status: "draft",
+    exported: false,
+  },
+  {
+    id: "tle-notion-419a-admin-panel",
+    title: "The Launch Era · What your Admin Panel can change",
+    description: "Editorial brief from Notion: Show website content, product photos, pricing and menu/promotions as actually supported. Compare client-managed and monthly-managed services. Images and final caption require approval.",
+    link: "https://thelaunchera.com/website-for-your-business/",
+    board: "Websites & Digital Menus",
+    image: `${import.meta.env.BASE_URL}pinpilot-campaign/2026-11/golden-grid.png`,
+    scheduledAt: null,
+    status: "draft",
+    exported: false,
+  },
+  {
+    id: "tle-notion-419a-instagram-visitors",
+    title: "The Launch Era · Your Instagram has visitors. Where do they go next?",
+    description: "Editorial brief from Notion: Show an authentic mobile website walkthrough and a working inquiry CTA. Script and visuals are awaiting owner review; not scheduled.",
+    link: "https://thelaunchera.com/",
+    board: "Websites & Digital Menus",
     image: "",
     scheduledAt: null,
     status: "draft",
     exported: false,
   },
+  {
+    id: "tle-notion-419a-website-pretty",
+    title: "The Launch Era · Your website should do more than look pretty",
+    description: "Editorial brief from Notion: Authentic restaurant, service or digital menu demo showing real interactions. CTA: See the demo. No fake checkout or automatic confirmations.",
+    link: "https://thelaunchera.com/website-for-your-business/",
+    board: "Websites & Digital Menus",
+    image: "",
+    scheduledAt: null,
+    status: "draft",
+    exported: false,
+  },
+  {
+    id: "tle-notion-419a-demo-inquiry",
+    title: "The Launch Era · From live demo to client inquiry",
+    description: "Editorial brief from Notion: Show a verified business demo and a clear next step: request and reply. No unpublished client information. Final visuals and caption pending review.",
+    link: "https://thelaunchera.com/",
+    board: "Websites & Digital Menus",
+    image: "",
+    scheduledAt: null,
+    status: "draft",
+    exported: false,
+  },
+  {
+    id: "tle-resource-8-master-prompts",
+    title: "8 Master Prompts — Free Creative Photo Ideas",
+    description: "Creative resource from the active The Launch Era Content Lab freebie campaign. Eight product photography composition ideas adaptable to shops, food and beauty brands. Resource is live; Pinterest artwork and caption are not yet approved.",
+    link: "https://podcast.thelaunchera.com/content-lab/prompts/",
+    board: "Creative Direction & Product Photos",
+    image: "https://podcast.thelaunchera.com/content-lab/prompts/matcha-01.jpg?v=hd-20261031",
+    scheduledAt: null,
+    status: "draft",
+    exported: false,
+  },
 ];
+
+export const mergeEditorial2026Pins = (existing: PinterestPin[]) => {
+  const known = new Set(existing.map(pin => pin.id));
+  const added = editorial2026Pins().filter(pin => !known.has(pin.id));
+  return { added: added.length, pins: [...existing, ...added] };
+};
+
+// Remove ONLY demo content and the three speculative pins added before reviewing Notion.
+// Save the entire prior browser state before migration. Never remove other user-created pins.
+const OLD_DEMO_IDS = new Set([
+  "demo-breakfast", "demo-home", "demo-flowers", "demo-guide",
+  "tle-pin-2026-11-16-freebie-photo-ideas",
+  "tle-pin-2026-11-18-food-digital-menu",
+  "tle-pin-2026-11-20-beauty-website",
+]);
+const EDITORIAL_MIGRATION_KEY = "pinpilot.editorial-tle-2026.v1";
+const EDITORIAL_PREVIOUS_BACKUP_KEY = "pinpilot.editorial-tle-2026.previous-pins.v1";
+
+export const createDemoPins = (): PinterestPin[] => []; // No fabricated demo pins in a real business workspace.
+
+export const migrateToRealEditorialPins = (existing: PinterestPin[]) => {
+  const removed = existing.filter(pin => OLD_DEMO_IDS.has(pin.id) || /\\bblock[ -]?jam\\b/i.test(pin.title));
+  const keep = existing.filter(pin => !OLD_DEMO_IDS.has(pin.id) && !/\\bblock[ -]?jam\\b/i.test(pin.title));
+  return { ...mergeEditorial2026Pins(keep), removed: removed.length };
+};
 
 export const readPins = (): PinterestPin[] => {
   try {
     const raw = window.localStorage.getItem(PINS_KEY);
-    if (raw === null) return createDemoPins();
-    const parsed: unknown = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as PinterestPin[]) : createDemoPins();
+    const parsed: unknown = raw ? JSON.parse(raw) : [];
+    const current = Array.isArray(parsed) ? (parsed as PinterestPin[]) : [];
+    if (window.localStorage.getItem(EDITORIAL_MIGRATION_KEY) === "done") return current;
+    const migration = migrateToRealEditorialPins(current);
+    if (raw !== null && raw !== JSON.stringify(migration.pins) &&
+        window.localStorage.getItem(EDITORIAL_PREVIOUS_BACKUP_KEY) === null) {
+      // Fail safe: never overwrite old pins if there is no space to preserve a backup.
+      window.localStorage.setItem(EDITORIAL_PREVIOUS_BACKUP_KEY, raw);
+    }
+    window.localStorage.setItem(PINS_KEY, JSON.stringify(migration.pins));
+    window.localStorage.setItem(EDITORIAL_MIGRATION_KEY, "done");
+    return migration.pins;
   } catch {
-    return createDemoPins();
+    // Preserve the original browser records on storage failure rather than risk data loss.
+    try {
+      const raw = window.localStorage.getItem(PINS_KEY);
+      const pins: unknown = raw ? JSON.parse(raw) : [];
+      return Array.isArray(pins) ? pins as PinterestPin[] : [];
+    } catch { return []; }
   }
 };
 
