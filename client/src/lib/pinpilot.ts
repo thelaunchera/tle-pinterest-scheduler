@@ -144,6 +144,52 @@ const addDaysAtTime = (offset: number, time = "09:00") => {
   return fromZonedInputValue(`${dateKey}T${time}`, DEFAULT_SETTINGS.timezone) ?? new Date().toISOString();
 };
 
+// Campaign assets are committed to this public GitHub repository and deployed with GitHub Pages.
+// They are only added to a visitor's browser when the explicit campaign link is opened.
+export const NOVEMBER_2026_CAMPAIGN = "tle-nov-2026";
+
+export const november2026CampaignPins = (): PinterestPin[] => [
+  {
+    id: "tle-pin-2026-11-16-freebie-photo-ideas",
+    title: "8 Product Photography Ideas for Your Small Business",
+    description: "One product can inspire more than one beautiful post. Explore 8 free visual prompts to create fresh compositions for your shop, cafe, beauty brand or product business. Blue Hour is a creative product concept by The Launch Era. Get the free prompts.",
+    link: "https://podcast.thelaunchera.com/content-lab/prompts/",
+    board: "Creative Ideas for Small Businesses",
+    image: `${import.meta.env.BASE_URL}pinpilot-campaign/2026-11/blue-hour.png`,
+    scheduledAt: "2026-11-16T15:00:00.000Z",
+    status: "scheduled",
+    exported: false,
+  },
+  {
+    id: "tle-pin-2026-11-18-food-digital-menu",
+    title: "Food Business Branding, Websites & Digital Menu Ideas",
+    description: "Beautiful food photography is just the beginning. See how a thoughtful website can help a cafe, bakery or food business present its products, menu and brand online. Golden Grid is a concept project by The Launch Era. Explore our website services and interactive demos.",
+    link: "https://thelaunchera.com/website-for-your-business/",
+    board: "Digital Menus & Food Websites",
+    image: `${import.meta.env.BASE_URL}pinpilot-campaign/2026-11/golden-grid.png`,
+    scheduledAt: "2026-11-18T15:00:00.000Z",
+    status: "scheduled",
+    exported: false,
+  },
+  {
+    id: "tle-pin-2026-11-20-beauty-website",
+    title: "A Beautiful Brand Deserves a Website to Match",
+    description: "Your Instagram introduces your business. A clear website gives people another place to explore your services and find the next step. Whether you run a nail studio, salon or another small business, see what a more organized online presence could look like. Nail Room is a concept project by The Launch Era.",
+    link: "https://thelaunchera.com/",
+    board: "Websites for Small Businesses",
+    image: `${import.meta.env.BASE_URL}pinpilot-campaign/2026-11/nail-room.png`,
+    scheduledAt: "2026-11-20T15:00:00.000Z",
+    status: "scheduled",
+    exported: false,
+  },
+];
+
+export const mergeNovember2026CampaignPins = (existing: PinterestPin[]) => {
+  const existingIds = new Set(existing.map(pin => pin.id));
+  const added = november2026CampaignPins().filter(pin => !existingIds.has(pin.id));
+  return { added: added.length, pins: [...existing, ...added] };
+};
+
 export const createDemoPins = (): PinterestPin[] => [
   {
     id: "demo-breakfast",
