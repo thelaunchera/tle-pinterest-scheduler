@@ -92,8 +92,8 @@ El proyecto completo de **PinPilot — The Launch Era** se conserva en este repo
 - **URL de GitHub Pages:** https://thelaunchera.github.io/tle-pinterest-scheduler/
 - **Zona horaria:** `America/New_York` (Florida; EST/EDT automático).
 
-El enlace de GitHub Pages solo funcionará después de la **activación inicial de GitHub Pages**. La instalación actual de GitHub no concede a la automatización permisos para realizar esa activación administrativa. Desde el repositorio, entra en **Settings → Pages → Build and deployment**; selecciona **Deploy from a branch**, rama **gh-pages**, carpeta **/(root)** y pulsa **Save**. GitHub puede tardar unos minutos en publicar. Esta activación no requiere añadir dominios ni registros DNS.
+**Sitio publicado y comprobado:** https://thelaunchera.github.io/tle-pinterest-scheduler/ . GitHub Pages está configurado para publicar desde la raíz de `main`. Por eso el sitio compilado (`index.html`, `assets/`, `api/`, `.nojekyll`) se incorporó también a esa rama, sin eliminar el código fuente. La rama `gh-pages` conserva otra copia compilada para futuras actualizaciones. No requiere AppDeploy ni DNS personalizado.
 
-El código y el sitio compilado ya se preparan directamente desde GitHub. Los cambios futuros en `main` compilarán otra vez la web en `gh-pages` de forma automática.
+El código y las compilaciones se mantienen en GitHub. Los cambios en el código de `main` generan una nueva compilación en `gh-pages`; **la versión visible en Pages usa `main`**, por lo que habrá que sincronizar de nuevo los archivos compilados con la raíz de `main` para actualizar la web pública.
 
 > **Datos existentes:** la versión web guarda los pines, borradores y ajustes en el navegador local. Cambiar de dirección no los migra automáticamente. Exporta un respaldo JSON desde la instalación anterior e impórtalo en la web de GitHub cuando esté activa. Programar horarios en PinPilot no publica automáticamente en Pinterest.
