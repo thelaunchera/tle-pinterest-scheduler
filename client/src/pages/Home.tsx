@@ -86,13 +86,15 @@ const WEEKDAYS = [
 ];
 
 const TIMEZONES = [
+  {
+    value: "America/New_York",
+    label: "Florida — Boynton Beach / Miami (EST UTC−5 · EDT UTC−4)",
+  },
   { value: "America/Mexico_City", label: "Ciudad de México (UTC−6)" },
   { value: "America/Bogota", label: "Bogotá (UTC−5)" },
   { value: "America/Lima", label: "Lima (UTC−5)" },
   { value: "America/Santiago", label: "Santiago (UTC−4/−3)" },
   { value: "America/Argentina/Buenos_Aires", label: "Buenos Aires (UTC−3)" },
-  { value: "America/New_York", label: "Nueva York (UTC−5/−4)" },
-  { value: "America/New_York", label: "Florida — Este, Miami/Orlando (UTC−5/−4)" },
   { value: "America/Chicago", label: "Florida Panhandle — Pensacola (UTC−6/−5)" },
   { value: "America/Los_Angeles", label: "Los Ángeles (UTC−8/−7)" },
   { value: "Europe/Madrid", label: "Madrid (UTC+1/+2)" },
