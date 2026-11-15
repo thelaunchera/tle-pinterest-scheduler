@@ -247,8 +247,8 @@ const EDITORIAL_PREVIOUS_BACKUP_KEY = "pinpilot.editorial-tle-2026.previous-pins
 export const createDemoPins = (): PinterestPin[] => []; // No fabricated demo pins in a real business workspace.
 
 export const migrateToRealEditorialPins = (existing: PinterestPin[]) => {
-  const removed = existing.filter(pin => OLD_DEMO_IDS.has(pin.id) || /\\bblock[ -]?jam\\b/i.test(pin.title));
-  const keep = existing.filter(pin => !OLD_DEMO_IDS.has(pin.id) && !/\\bblock[ -]?jam\\b/i.test(pin.title));
+  const removed = existing.filter(pin => OLD_DEMO_IDS.has(pin.id) || /block[ -]?jam/i.test(pin.title));
+  const keep = existing.filter(pin => !OLD_DEMO_IDS.has(pin.id) && !/block[ -]?jam/i.test(pin.title));
   return { ...mergeEditorial2026Pins(keep), removed: removed.length };
 };
 
