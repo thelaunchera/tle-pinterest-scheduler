@@ -83,16 +83,35 @@ La exportación CSV sigue disponible para trabajar con títulos, descripciones, 
 - `pnpm test`: pruebas automatizadas.
 - `pnpm build` / `pnpm start`: construir / ejecutar el servidor de producción.
 
-## Publicación en GitHub
+## Producción: AppDeploy y GitHub
 
-El código completo de PinPilot ya está importado en la rama `main` de este repositorio **público**.
+La aplicación de producción está alojada en **AppDeploy**:
 
-El archivo `.github/workflows/deploy-pages.yml` instala las dependencias, ejecuta las comprobaciones TypeScript y pruebas automatizadas, compila la interfaz de React y prepara el despliegue en GitHub Pages.
+- **Aplicación:** PinPilot — The Launch Era
+- **AppDeploy app ID:** `pinpilot-the-launch-era-kwfc29`
+- **URL operativa:** https://pinpilot-the-launch-era-kwfc29.v2.appdeploy.ai/
+- **Repositorio de código:** https://github.com/thelaunchera/tle-pinterest-scheduler
+- **Zona horaria predeterminada:** `America/New_York` (Florida, EST/EDT automático)
+- **Dominio solicitado, pendiente de conectar:** `pinpilot.thelaunchera.com`
 
-**Activación necesaria una sola vez:** ve a **Settings → Pages → Build and deployment → Source → GitHub Actions**. Esta configuración necesita acceso de administrador del repositorio y no puede habilitarse mediante el token de GitHub Actions. Después ejecuta **Actions → Build and publish PinPilot → Run workflow**.
+**Sincronización:** GitHub conserva el código fuente y AppDeploy aloja su propia copia adaptada al entorno React de la plataforma. Los cambios en GitHub **no** publican automáticamente una nueva versión en AppDeploy; actualiza el proyecto de AppDeploy mediante su herramienta de despliegue cuando haya modificaciones.
 
-URL prevista una vez que GitHub Pages confirme un despliegue exitoso: `https://thelaunchera.github.io/tle-pinterest-scheduler/`. La URL no debe considerarse publicada hasta que el workflow termine con éxito.
+### Dominio personalizado
 
-Si tienes borradores en el dominio de Manus, exporta primero **Exportar → Descargar respaldo completo** y utiliza **Importar respaldo JSON** en el nuevo dominio. Los datos del navegador no se transfieren automáticamente.
+AppDeploy exige una suscripción **Lite o Plus** para conectar y activar un dominio personalizado. El plan Free no permite registrar `pinpilot.thelaunchera.com` todavía; no se debe decir que la URL está activa hasta que la herramienta confirme el dominio y responda correctamente.
 
-Planificar pines no los publica en Pinterest; la integración de publicación no está conectada.
+Cuando se habilite esa capacidad, añadir en AppDeploy el dominio `pinpilot.thelaunchera.com` con modo `subdomain_cname`, y crear **solo** el siguiente registro en el DNS autoritativo de `thelaunchera.com`:
+
+| Tipo | Host | Valor |
+| --- | --- | --- |
+| CNAME | `pinpilot` | `proxy-v2.appdeploy.ai` |
+
+Verificar y activar el dominio desde AppDeploy. No cambiar los registros `@`, `www`, `command`, otros subdominios, MX, TXT, ni configuraciones de correo o del website principal. No es necesario mover el dominio raíz.
+
+### Privacidad y límites de la aplicación
+
+PinPilot guarda sus pines y ajustes en el **navegador local**. Cambiar el dominio no traslada los datos automáticamente. Antes de cambiar, descarga **Exportar → Descargar respaldo completo** y luego utiliza **Importar respaldo JSON** en la nueva dirección. La publicación directa a Pinterest aún no está conectada: programar en el calendario no publica los pines.
+
+### Verificación del repositorio
+
+Ejecuta `pnpm install --frozen-lockfile`, `pnpm check`, `pnpm test` y `pnpm build` con Node.js 22 y pnpm 10.18.0. El flujo de CI `.github/workflows/check.yml` valida el código; ya no hay desplegadores de GitHub Pages ni Vercel.
