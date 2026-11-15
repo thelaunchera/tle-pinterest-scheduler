@@ -83,7 +83,16 @@ La exportación CSV sigue disponible para trabajar con títulos, descripciones, 
 - `pnpm test`: pruebas automatizadas.
 - `pnpm build` / `pnpm start`: construir / ejecutar el servidor de producción.
 
-La conexión a GitHub y cualquier publicación son operaciones separadas. Este repositorio de exportación no despliega la aplicación automáticamente.
+## Publicación en GitHub
 
+El código completo de PinPilot ya está importado en la rama `main` de este repositorio **público**.
 
-Nota sobre publicación en Manus: este paquete y la transferencia al repositorio GitHub no inician una publicación. La configuración actual del proyecto tiene Auto Publish activado; si más adelante el proyecto sigue vinculado a Manus, un checkpoint futuro podría publicarse automáticamente. No se hará push a `origin/main` ni se desplegará en esta tarea. Desactiva Auto Publish en el Dashboard antes de guardar futuros checkpoints si no deseas ese comportamiento.
+El archivo `.github/workflows/deploy-pages.yml` instala las dependencias, ejecuta las comprobaciones TypeScript y pruebas automatizadas, compila la interfaz de React y prepara el despliegue en GitHub Pages.
+
+**Activación necesaria una sola vez:** ve a **Settings → Pages → Build and deployment → Source → GitHub Actions**. Esta configuración necesita acceso de administrador del repositorio y no puede habilitarse mediante el token de GitHub Actions. Después ejecuta **Actions → Build and publish PinPilot → Run workflow**.
+
+URL prevista una vez que GitHub Pages confirme un despliegue exitoso: `https://thelaunchera.github.io/tle-pinterest-scheduler/`. La URL no debe considerarse publicada hasta que el workflow termine con éxito.
+
+Si tienes borradores en el dominio de Manus, exporta primero **Exportar → Descargar respaldo completo** y utiliza **Importar respaldo JSON** en el nuevo dominio. Los datos del navegador no se transfieren automáticamente.
+
+Planificar pines no los publica en Pinterest; la integración de publicación no está conectada.
