@@ -50,9 +50,9 @@ import {
   addDaysToDateKey,
   dateKeyDistance,
   createPinPilotBackup,
-  NOVEMBER_2026_CAMPAIGN,
-  november2026CampaignPins,
-  mergeNovember2026CampaignPins,
+  EDITORIAL_IMPORT_KEY,
+  editorial2026Pins,
+  mergeEditorial2026Pins,
   parsePinPilotBackup,
   escapeSpreadsheetCsvCell,
   fromZonedInputValue,
@@ -310,34 +310,34 @@ export default function Home() {
     if (!saveSettings(settings)) toast.error("No se pudieron guardar tus preferencias.");
   }, [settings]);
 
-  // The campaign URL imports exactly the approved three pins into this browser.
-  // Other pins and account settings are preserved, and repeating the URL is idempotent.
-  useEffect(() => {
-    const url = new URL(window.location.href);
-    if (url.searchParams.get("add-pins") !== NOVEMBER_2026_CAMPAIGN) return;
-
-    const merged = mergeNovember2026CampaignPins(readPins());
+  // The user's live Notion editorial sources are now the sole initial PinPilot content.
+  // Optional link/button can re-add missing approved-source drafts, never overwrite edits.
+  const restoreEditorialDrafts = () => {
+    const merged = mergeEditorial2026Pins(readPins());
     if (!savePins(merged.pins)) {
-      toast.error("No se pudieron guardar los 3 pines. Libera espacio y vuelve a abrir este enlace.");
+      toast.error("No se pudieron guardar los borradores. Revisa el espacio del navegador.");
       return;
     }
-
     setPins(merged.pins);
-    const campaignBoards = november2026CampaignPins().map(pin => pin.board);
     setSettings(previous => ({
       ...previous,
-      boards: [...new Set([...previous.boards, ...campaignBoards])],
+      boards: [...new Set([...previous.boards.filter(board =>
+        !["Ideas para desayunos", "Hogar cálido", "Flores y papelería"].includes(board)),
+        ...editorial2026Pins().map(pin => pin.board)])],
     }));
-    setActiveSection("schedule");
-    setCalendarView("week");
-    setSelectedDate(dateFromDateKey("2026-11-16"));
-    setShownMonth(startOfMonth(dateFromDateKey("2026-11-16")));
-
-    url.searchParams.delete("add-pins");
-    window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
+    setActiveSection("library");
+    setLibraryFilter("draft");
     toast.success(merged.added > 0
-      ? `${merged.added} pines añadidos: 16, 18 y 20 de noviembre · 10 AM Florida.`
-      : "Estos 3 pines ya estaban en tu calendario. No se duplicaron.");
+      ? `${merged.added} fichas reales del Centro Editorial añadidas como borradores. Nada se programó.`
+      : "Las fichas editoriales ya estaban en tu biblioteca. No se duplicaron.");
+  };
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("add-editorial") !== EDITORIAL_IMPORT_KEY) return;
+    restoreEditorialDrafts();
+    url.searchParams.delete("add-editorial");
+    window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
   }, []);
 
   const todayKey = zonedDateKey(new Date(), settings.timezone);
@@ -731,6 +731,18 @@ export default function Home() {
             </div>
             <div className="heading-date"><CalendarDays size={16} /><span>{format(todayDate, "EEEE, d 'de' MMMM", { locale: es })}</span></div>
           </div>
+
+          <section className="backup-card" aria-label="Centro Editorial de The Launch Era">
+            <div className="backup-card-heading">
+              <span className="small-card-icon"><Sparkles size={17} /></span>
+              <div><b>Centro Editorial · The Launch Era</b><p>Websites, menús digitales, demos y creatividad. Borradores de Notion: sin clase, limpieza ni ejemplos inventados. No se publican automáticamente.</p></div>
+            </div>
+            <div className="backup-actions">
+              <button className="button button-secondary" onClick={restoreEditorialDrafts}>
+                <Plus size={15} /> Recuperar fichas editoriales
+              </button>
+            </div>
+          </section>
 
           <section className="stats-grid" aria-label="Resumen del calendario">
             <div className="stat-card stat-yellow"><span className="stat-label">EN COLA</span><strong>{scheduledPins.length}</strong><small>pines programados</small><span className="stat-symbol"><CalendarDays size={17} /></span></div>
